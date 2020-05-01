@@ -1,6 +1,3 @@
-# SCPs
-> Inbox for Suggestions, Comments, and Proposals to improve OrbitDB
-
 This repository is a collection of SCPs to improve OrbitDB - detailed ideas intended solicit discussion that leads to consensus.
 
 ### SCP Process
