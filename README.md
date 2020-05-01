@@ -1,37 +1,12 @@
-## Welcome to GitHub Pages
+# SCPs
+> Inbox for Suggestions, Comments, and Proposals to improve OrbitDB
 
-You can use the [editor on GitHub](https://github.com/orbitdb/SCPs/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+This repository is a collection of SCPs to improve OrbitDB - detailed ideas intended solicit discussion that leads to consensus.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### SCP Process
 
-### Markdown
+All ideas are welcome. An SCP should start as a pull request to this repo. Merged SCP should be considered "finalized" and ready for development.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### Process Status: `experimental`
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/orbitdb/SCPs/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+This process is itself in flux and may change or end at some point.
