@@ -1,6 +1,14 @@
 ## SCP-6: Ipfs-log Entry version 3
 ###### Status: Draft
 ###### Authors: [@tabcat](https://github.com/tabcat)
+###### Contents:
+ - [Background](#background)
+ - [Motivation](#motivation)
+ - [Entry Version 2](#entry-version-2)
+ - [Entry Version 3](#entry-version-3)
+ - [Byte Comparison](#byte-comparison)
+ - [Summary](#summary)
+
 
 ### Background
 
@@ -92,9 +100,9 @@ Using OrbitDB as an example, `writer.id` could be set to the CID of the orbitdb 
 
 The `payload`, `next`, and `refs` fields remain unchanged.
 
-### Byte change
+### Byte Comparison
 
-Let's look at the byte comparison.
+Let's look at how the changes affected the byte size.
 
 The numbers below show the ipld block size of an orbitdb ipfs-log entry encoded using [dag-cbor](https://github.com/ipld/js-ipld-dag-cbor).
 The user space fields `payload` and `id`/`log` fields have been removed from both entries.
