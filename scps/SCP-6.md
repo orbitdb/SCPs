@@ -105,7 +105,7 @@ The `payload`, `next`, and `refs` fields remain unchanged.
 Let's look at how the changes affected the byte size.
 
 The numbers below show the ipld block size of an orbitdb ipfs-log entry encoded using [dag-cbor](https://github.com/ipld/js-ipld-dag-cbor).
-The user space fields `payload` and `id`/`log` fields have been removed from both entries.
+The user space fields `payload` and `id`/`log` have been removed from both entries.
 
 ```
 entry version 2 size: 995B
