@@ -21,13 +21,13 @@ Besides references to previous entries, entries include other useful data like:
  - who created the entry
  - a payload field for any JSON value
 
-These pieces together, entry references for log traversal and entry ordering data, allow for smooth and stress-free replication of the log over IPFS.
+These pieces together, entry references for log traversal and data used for conflict-resolution/ordering, allow for smooth and stress-free replication of the log over IPFS.
 
 ### Motivation
 
 It is in users best interests that Ipfs-log required entry data is minimum. This minimal-ness keeps the log flexible and extensible by only requiring data and fields that are necessary for all users.
 
-Entry version 3 will be simpler, slimmer, and more friendly to extension by writers. It reduces entry block size by 764 bytes compared to version 2, which is around ~75% reduction of required entry data. This reduction is done by deduplicating frequently used data and removing unnecessary entry fields. Version 3 also encapsulates writer related fields making custom entry authentication cleaner.
+Entry version 3 will be simpler, slimmer, and more friendly to extension by writers. It reduces entry block size by 764 bytes compared to version 2, which is around 75% reduction of required entry data. This reduction is done by deduplicating frequently used data and removing unnecessary entry fields. Version 3 also encapsulates writer related fields making custom entry authentication cleaner.
 
 As some of these proposed changes are far reaching and all break backwards compatibility, it may be best to introduce these changes with the [future release of OrbitDB version 1](https://github.com/orbitdb/orbit-db/issues/819).
 
@@ -65,7 +65,7 @@ As mentioned in [The Road to 1.0](https://github.com/orbitdb/orbit-db/issues/819
 
 The `sig` field contains a string, hex encoded digital signature of fields: `v`, `clock`, `id`, `payload`, `next`, `refs`, and `hash`. It is used to verify that `identity` is the one that created the entry and that it wrote the entry. Since the data is currently a hex encoded string, it could instead be encoded into base64 strings to pinch a few bytes (~40B per `sig`). Base64 uses [33% less space](https://stackoverflow.com/questions/3183841/base64-vs-hex-for-sending-binary-content-over-the-internet-in-xml-doc) than base16/hex so if encoding/decoding speeds are similar this change may make sense.
 
-Entry version 3 does not propose any changes to fields `v`, `payload`, `next`, or `refs`.
+Entry version 3 does not propose any changes to fields `payload`, `next`, or `refs`.
 
 ### Entry version 3
 
@@ -88,14 +88,14 @@ What's changed?
 
 Obviously `v` has been incremented to the next version; also `hash` has been removed.
 
-Field `id` has been renamed to `log` which is more a descriptive and less common field name.
+Field `id` has been renamed to `log` which is a more descriptive and less common field name.
 
-The old `clock.time` field is now `clock` and `clock.id` is gone. If custom clock ids are a must they should be lazily added and `clock` will look similar to entry version 2.
+The old `clock.time` field is now `clock` and `clock.id` is gone. If custom clock ids are a must, `clock` should stay similar to version 2 entries but with `clock.id` lazily added.
 
 The `key` field has been removed.
 
 A new field `writer` has been added. This field encapsulates parts that are mainly connected to entry authentication. The only Ipfs-log required field inside of `writer` is `writer.id` which must be a string and is used for ordering and access control.
-The `writer` field is otherwise controlled and set by a writer function which allows more flexibility for entry authentication. A writer function is used by Ipfs-log to get the `writer` field for an entry. It takes an unauthenticated entry and an identity and returns an object to be set as the `writer` field.
+The `writer` field is otherwise controlled and set by a writer function which allows more flexibility for entry authentication. A writer function is used by Ipfs-log to get the `writer` field for an entry. It takes an unauthenticated entry and returns an object to be set as the `writer` field.
 Using OrbitDB as an example, `writer.id` could be set to the CID of the orbitdb writer identity while leaving the signature field unchanged but moved to `writer.sig`.
 
 The `payload`, `next`, and `refs` fields remain unchanged.
@@ -105,7 +105,7 @@ The `payload`, `next`, and `refs` fields remain unchanged.
 Let's look at how the changes affected the byte size.
 
 The numbers below show the ipld block size of an orbitdb ipfs-log entry encoded using [dag-cbor](https://github.com/ipld/js-ipld-dag-cbor).
-The user space fields `payload` and `id`/`log` have been removed from both entries.
+The user space fields `payload` and `id`/`log` have been removed from both entries' blocks.
 
 ```
 entry version 2 size: 995B
