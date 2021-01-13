@@ -65,7 +65,11 @@ As mentioned in [The Road to 1.0](https://github.com/orbitdb/orbit-db/issues/819
 
 The `sig` field contains a string, hex encoded digital signature of fields: `v`, `clock`, `id`, `payload`, `next`, `refs`, and `hash`. It is used to verify that `identity` is the one that created the entry and that it wrote the entry. Since the data is currently a hex encoded string, it could instead be encoded into base64 strings to pinch a few bytes (~40B per `sig`). Base64 uses [33% less space](https://stackoverflow.com/questions/3183841/base64-vs-hex-for-sending-binary-content-over-the-internet-in-xml-doc) than base16/hex so if encoding/decoding speeds are similar this change may make sense.
 
-Entry version 3 does not propose any changes to fields `payload`, `next`, or `refs`.
+The `next` field is an array of ipfs/ipld CIDs. These CIDs reference the log heads or latest entries to the log. The goal of this field is to reference all entries that have not been reference by another entry. By doing this we ensure that all but the latest entries in the log are referenced and are not lost. This allows the log to be traverse entirely by anyone starting from the latest entries (assuming the references can be resolved to their entries).
+
+The `refs` field is similar to the `next` in that they are both arrays of CIDs. The difference between them is that `refs` references entries further away at an exponentially growing rate. The length of this array depends on the length of the log. Also it will exclude any CID already existing in `next`. This field was added to speed up loading/replicating the log by exposing more entry references for concurrent fetching and traversal.
+
+Entry version 3 does not propose any changes to fields `payload`.
 
 ### Entry version 3
 
@@ -79,7 +83,6 @@ What's changed?
   auth: <CID>,
   sig: String,
   payload: <any JSON.stringify-able data>,
-  next: [<CID>],
   refs: [<CID>]
 }
 ```
@@ -96,7 +99,9 @@ A new field `auth` has been added which replaces `identity`. This field referenc
 
 The `sig` field does not change. As stated below, it along with some other fields could be encoded in base-64 instead of hex to save some bytes.
 
-The `sig`, `payload`, `next`, and `refs` fields remain unchanged.
+The `next` field has been removed. Its value, an array of CIDs referencing the latest entries, has been merged into the beginning of the `refs` field. The `refs` field is unchanged besides it also containing entry heads at the beginning of its array.
+
+The `sig` and `payload` fields remain unchanged.
 
 ### Byte Comparison
 
