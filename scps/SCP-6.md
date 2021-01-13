@@ -76,10 +76,8 @@ What's changed?
   v: 3,
   log: String,
   clock: Number,
-  writer: {
-    id: <CID>,
-    sig: String
-  },
+  auth: <CID>,
+  sig: String,
   payload: <any JSON.stringify-able data>,
   next: [<CID>],
   refs: [<CID>]
@@ -94,11 +92,11 @@ The old `clock.time` field is now `clock` and `clock.id` is gone. If custom cloc
 
 The `key` field has been removed.
 
-A new field `writer` has been added. This field encapsulates parts that are mainly connected to entry authentication. The only Ipfs-log required field inside of `writer` is `writer.id` which must be a string and is used for ordering and access control.
-The `writer` field is otherwise controlled and set by a writer function which allows more flexibility for entry authentication. A writer function is used by Ipfs-log to get the `writer` field for an entry. It takes an unauthenticated entry and returns an object to be set as the `writer` field.
-Using OrbitDB as an example, `writer.id` could be set to the CID of the orbitdb writer identity while leaving the signature field unchanged but moved to `writer.sig`.
+A new field `auth` has been added which replaces `identity`. This field references data used to authenticate the entry. The referenced data will likely include a public key for verifying the entry signature among other data configured by the auth type. This field, unlike many other entry fields, is not unique per entry which makes it a great candidate for de-duplication with ipld. In entry version 2 the `identity` field is relatively large and includes `identity.id` which is used for conflict-resolution/ordering. In entry version 3, since `identity` has been replaced with a reference to what was `identity`, the reference could take `identity.id`s job of conflict-resolution.
 
-The `payload`, `next`, and `refs` fields remain unchanged.
+The `sig` field does not change. As stated below, it along with some other fields could be encoded in base-64 instead of hex to save some bytes.
+
+The `sig`, `payload`, `next`, and `refs` fields remain unchanged.
 
 ### Byte Comparison
 
