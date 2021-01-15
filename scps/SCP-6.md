@@ -1,6 +1,8 @@
 ## SCP-6: Ipfs-log Entry version 3
 ###### Status: Draft
-###### Authors: [@tabcat](https://github.com/tabcat)
+###### Authors:
+ - [@tabcat](https://github.com/tabcat)
+ - [@haadcode](https://github.com/haadcode)
 ###### Contents:
  - [Background](#background)
  - [Motivation](#motivation)
