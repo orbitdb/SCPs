@@ -3,6 +3,7 @@
 ###### Authors:
  - [@tabcat](https://github.com/tabcat)
  - [@haadcode](https://github.com/haadcode)
+ 
 ###### Contents:
  - [Background](#background)
  - [Motivation](#motivation)
@@ -14,64 +15,67 @@
 
 ### Background
 
-[Ipfs-log](https://github.com/orbitdb/ipfs-log) is a core part of [OrbitDB](https://github.com/orbitdb), it is used by the databases to derive its state from an immutable log. This log is built from entries added to the log. Entries are added using [IPFS](https://ipfs.io) and reference previously made entries by their IPFS address.
+[Ipfs-log](https://github.com/orbitdb/ipfs-log) is a core part of [OrbitDB](https://orbitdb.org), it is used by the database to derive its state from an immutable log. This log is built from entries added to the log. Entries are immutable and reference previous entries by [content-address](https://docs.ipfs.io/concepts/content-addressing) (aka content-id or CID); creating causal and traverse-able links.
 
 Besides references to previous entries, entries include other useful data like:
  - entry version
  - which log the entry belongs to
  - ordering information
  - who created the entry
- - a payload field for any JSON value
+ - a JSON value payload
 
-These pieces together, entry references for log traversal and data used for conflict-resolution/ordering, allow for smooth and stress-free replication of the log over IPFS.
+These pieces together, entry references for log traversal and data used for conflict-resolution/ordering, allow for smooth and stress-free replication of the log using the [IPFS](https://ipfs.io) network.
 
 ### Motivation
 
-It is in users best interests that Ipfs-log required entry data is minimum. This minimal-ness keeps the log flexible and extensible by only requiring data and fields that are necessary for all users.
+It is in the user's best interest that ipfs-log required entry data is minimum. This minimal-ness keeps the log flexible and extensible by only requiring data and fields that are necessary for all users.
 
-Entry version 3 will be simpler, slimmer, and more friendly to extension by writers. It reduces entry block size by 764 bytes compared to version 2, which is around 75% reduction of required entry data. This reduction is done by deduplicating frequently used data and removing unnecessary entry fields. Version 3 also encapsulates writer related fields making custom entry authentication cleaner.
+Entry version 3 will be simpler and slimmer. It reduces entry block size by 820 bytes compared to version 2, which is around 80% reduction of required entry data. This reduction is done by de-duplicating frequently used data and simplifying or removing unnecessary entry fields.
 
 As some of these proposed changes are far reaching and all break backwards compatibility, it may be best to introduce these changes with the [future release of OrbitDB version 1](https://github.com/orbitdb/orbit-db/issues/819).
 
 ### Entry version 2
 
-Let's start by taking a look at the structure of an entry in version 2 which is the current version.
+Let's start by taking a look at the structure of an entry in version 2, the version currently used by ipfs-log.
 
 ```
 {
+  hash: null
   v: 2,
   id: String,
   clock: {
     time: Number,
-    id: <defaults to identity.publicKey>
+    id: <identity.publicKey>
   },
   key: <identity.publicKey>,
   identity: <identity.toJSON()>,
   sig: String,
-  payload: <any JSON.stringify-able data>,
+  payload: <JSON>,
   next: [<CID>],
-  refs: [<CID>],
-  hash: null
+  refs: [<CID>]
 }
 ```
+This is a rough breakdown of what entry version 2 looks like read from [ipld](https://docs.ipld.io).
 
-This is a rough breakdown of what entry version 2 looks like read from ipld. As you can see the `hash` field is null thanks to how hashes and immutable data works. At first glance it seems like we could just remove it without issue, it contains no useful data and I'm not sure why its here to begin with. It's actually one of the fields included with [data to be signed](https://github.com/orbitdb/ipfs-log/blob/b8e4b76247d1bd9b5fa8ad751a62d7f0f3f3f560/src/entry.js#L41-L51) by the writer.
+- `hash`: This field as shown above is set to null when uploaded to ipld thanks to how immutable data works. This field can be removed without issue, it contains no useful data and shouldn't be included with the [signed](https://github.com/orbitdb/ipfs-log/blob/b8e4b76247d1bd9b5fa8ad751a62d7f0f3f3f560/src/entry.js#L41-L51) and immutable data.
 
-Skipping the version field `v`, which is as barebones as it gets, and moving onto `id`. This field can be set and used by Ipfs-log users to identify and separate entries made to different logs, it is meant to be a string. There is not much to change here as it's just a string set by the user in userland (like in OrbitDB). However in entry version 3 `id` is renamed to `log` because id is used in a couple different places and log seems much better at describing the property.
+- `v`: This field states the entry's version for anyone reading. As this is a very simple field there is not anything to change here.
 
-The `clock` field's value is an object with two properties, `time` and `id`. It is a Lamport clock logical timestamp and is the heaviest ordering metric of entries by default. The `clock.time` field, like `v`, is simply a positive integer, however `clock.id` by default is set to identity.publicKey which already exists in other places in the entry. This is a good chunk of bytes that can be excluded, either by lazily adding `clock.id` when explicitly set by the user or removing it completely (changing `clock` to what `clock.time` is now).
+- `id`: This field is a string and states what log the entry belongs to. It helps to prevent mixing up entries into the wrong log and replay attacks. There is not much to change here as it's just a string set by the user in userland (like in OrbitDB). However in entry version 3 `id` is renamed to `log` because 'id' is used in a couple different places and 'log' seems much better at describing the property.
 
-Fields relating to writer authentication are where the bulk of the bytes can be trimmed from the entry. The `key` field contains the writer's publicKey from their identity. This publicKey also exists at `identity.publicKey` so `key` could be removed from the entry.
+- `clock`: This field's value is an object with two properties, `time` and `id`. It is a Lamport clock logical timestamp and is the heaviest ordering metric of entries by default. The `clock.time` field, like `v`, is simply a positive integer, however `clock.id` by default is set to identity.publicKey which already exists in other places in the entry. This is a good chunk of bytes that can be excluded, either by lazily adding `clock.id` when explicitly set by the user or removing it completely (changing `clock` to what `clock.time` is now).
 
-As mentioned in [The Road to 1.0](https://github.com/orbitdb/orbit-db/issues/819), `separate identities/keys from oplog entry. CID per identity/key. cuts N bytes from each pubsub message and bitswap/ipfs/ild block transfer.`, the `identity` field could be replaced with the CID of the identity. This deduplication should work well as the `identity` field is the same data in every entry for each unique writer. However in situations where writer keys are ephemeral this is less advantaged and may be a good area to leave flexible.
+- `key`: This field contains the writer's identity.publicKey. This publicKey also exists at `identity.publicKey` so `key` could be removed from the entry.
 
-The `sig` field contains a string, hex encoded digital signature of fields: `v`, `clock`, `id`, `payload`, `next`, `refs`, and `hash`. It is used to verify that `identity` is the one that created the entry and that it wrote the entry. Since the data is currently a hex encoded string, it could instead be encoded into base64 strings to pinch a few bytes (~40B per `sig`). Base64 uses [33% less space](https://stackoverflow.com/questions/3183841/base64-vs-hex-for-sending-binary-content-over-the-internet-in-xml-doc) than base16/hex so if encoding/decoding speeds are similar this change may make sense.
+- `identity`: This field contains the entry writer's identity which is used by readers of the log to verify and sometimes order entries. As mentioned in [The Road to 1.0](https://github.com/orbitdb/orbit-db/issues/819), "separate identities/keys from oplog entry. CID per identity/key. cuts N bytes from each pubsub message and bitswap/ipfs/ild block transfer", the `identity` field could be replaced with the CID of the identity. This de-duplication should work well as the `identity` field is the same data in every entry for each unique writer. However in situations where writer keys are ephemeral this is less advantaged.
 
-The `next` field is an array of ipfs/ipld CIDs. These CIDs reference the log heads or latest entries to the log. The goal of this field is to reference all entries that have not been reference by another entry. By doing this we ensure that all but the latest entries in the log are referenced and are not lost. This allows the log to be traverse entirely by anyone starting from the latest entries (assuming the references can be resolved to their entries).
+- `sig`: This field contains a string, hex encoded digital signature of fields: `v`, `clock`, `id`, `payload`, `next`, `refs`, and `hash`. It is used to verify that `identity` created the entry. Since the data is currently a hex encoded string, it could instead be encoded into base64 strings to pinch a few bytes (~40B per signature). Base64 uses [33% less space](https://stackoverflow.com/questions/3183841/base64-vs-hex-for-sending-binary-content-over-the-internet-in-xml-doc) than base16/hex.
 
-The `refs` field is similar to the `next` in that they are both arrays of CIDs. The difference between them is that `refs` references entries further away at an exponentially growing rate. The length of this array depends on the length of the log. Also it will exclude any CID already existing in `next`. This field was added to speed up loading/replicating the log by exposing more entry references for concurrent fetching and traversal.
+- `payload`: This field, like `id`, is also userland and is set to any valid JSON data. Nothing to change here.
 
-Entry version 3 does not propose any changes to fields `payload`.
+- `next`: This field is an array of content-addresses. The goal of this field is to reference all entries that have not been reference by another entry; also known as head entries or heads. By doing this we ensure that all but the latest entries in the log are referenced and are not lost. This allows the log to be traversed by anyone starting from the latest entries.
+
+- `refs`: This field is similar to `next` in that they are both arrays of CIDs. The difference between them is that `refs` references entries at an exponentially growing distance away in the log. The length of this array depends on the length of the log. Also it will exclude any CID already existing in `next`. This field was added to speed up loading/replicating the log by exposing distant sections of the log for concurrent fetching and traversal.
 
 ### Entry version 3
 
@@ -84,26 +88,30 @@ What's changed?
   clock: Number,
   auth: <CID>,
   sig: String,
-  payload: <any JSON.stringify-able data>,
+  payload: <JSON>,
   refs: [<CID>]
 }
 ```
 
-Obviously `v` has been incremented to the next version; also `hash` has been removed.
+- `hash`: This field has been removed.
 
-Field `id` has been renamed to `log` which is a more descriptive and less common field name.
+- `v`: This field, which states the version, has been incremented to 3.
 
-The old `clock.time` field is now `clock` and `clock.id` is gone. If custom clock ids are a must, `clock` should stay similar to version 2 entries but with `clock.id` lazily added.
+- `log`: This field replaces/renames `id` from version 2 to be more descriptive of its purpose.
 
-The `key` field has been removed.
+- `clock`: This field becomes the value of `clock.time` from version 2 which is a number representing a logical timestamp.
 
-A new field `auth` has been added which replaces `identity`. This field references data used to authenticate the entry. The referenced data will likely include a public key for verifying the entry signature among other data configured by the auth type. This field, unlike many other entry fields, is not unique per entry which makes it a great candidate for de-duplication with ipld. In entry version 2 the `identity` field is relatively large and includes `identity.id` which is used for conflict-resolution/ordering. In entry version 3, since `identity` has been replaced with a reference to what was `identity`, the reference could take `identity.id`s job of conflict-resolution.
+- `key`: This field has been removed.
 
-The `sig` field does not change. As stated below, it along with some other fields could be encoded in base-64 instead of hex to save some bytes.
+- `auth` This field replaces `identity` from version 2. It is a content-address for the identity used to authenticate the entry. In entry version 2 the `identity` field is relatively large and includes `identity.id` which is used for conflict-resolution/ordering. In entry version 3, since `identity` has been replaced with a reference to what was `identity`, the reference could take `identity.id`s job of conflict-resolution if need be.
 
-The `next` field has been removed. Its value, an array of CIDs referencing the latest entries, has been merged into the beginning of the `refs` field. The `refs` field is unchanged besides it also containing entry heads at the beginning of its array.
+- `sig`: This field is now encoded into base-64 instead of hex to reduce entry size.
 
-The `sig` and `payload` fields remain unchanged.
+- `payload`: This field does not change.
+
+- `next`: This field has been removed. Its array values from version 2 have been moved into the `refs` array.
+
+- `refs`: This field's value is now the set union of the values of version 2 `next` and `refs` fields. This fields array is sorted alphabetically to promote determinism.
 
 ### Byte Comparison
 
@@ -114,25 +122,24 @@ The user space fields `payload` and `id`/`log` have been removed from both entri
 
 ```
 entry version 2 size: 995B
-entry version 3 size: 249B (203B w/ b64 encoded sig)
-size difference: 746B
+entry version 3 size: 175B
+size difference: 820B
 ```
 
-The most effective change made is that the `identity` field in version 2 has been replaced with `writer.id` in the example above, which becomes a CID reference to the identity, the real number of saved bytes in logs using version 3 entries will depend on the number of unique writers.
+The most effective change made is that the `identity` field in version 2 has been replaced with `auth` in the example above, which becomes the CID reference of the identity, the real number of saved bytes in logs using version 3 entries will depend on the number of unique writers.
 
 ```
-orbitdb identity block size: 538B
-real saved bytes: E * 995B - E * 249B - W * 538B
+orbit-db identity block size: 538B
+real saved bytes: E * 995B - E * 175B - W * 538B
 ```
 
 ### Summary
 
-The goal of this proposal is to simplify log entries to only include the minimum data required for Ipfs-log to operate while promoting extension by users on a need-be basis.
+The goal of this proposal is to simplify log entries to only include the minimum data required for ipfs-log to operate.
 
 This proposal does this by:
  - simplifying and removing specific entry fields
- - encapsulating writer related data and authentication
- - (possibly) encoding fields in a different base
+ - fields using a more space-efficient base encoding
 
 As many of the changes suggested are breaking, it may be best to introduce them with the release of OrbitDB version 1 if this proposal is accepted.
 
