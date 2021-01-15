@@ -103,7 +103,7 @@ What's changed?
 
 - `key`: This field has been removed.
 
-- `auth` This field replaces `identity` from version 2. It is a content-address for the identity used to authenticate the entry. In entry version 2 the `identity` field is relatively large and includes `identity.id` which is used for conflict-resolution/ordering. In entry version 3, since `identity` has been replaced with a reference to what was `identity`, the reference could take `identity.id`s job of conflict-resolution if need be.
+- `auth` This field replaces `identity` from version 2. It is a content-address for the identity used to authenticate the entry. In entry version 2 the `identity` field is relatively large and includes `identity.id` which is used for conflict-resolution/ordering. In entry version 3, since `identity` has been replaced with a reference to what was `identity`, the reference could take `identity.id`'s job of conflict-resolution if need be.
 
 - `sig`: This field is now encoded into base-64 instead of hex to reduce entry size.
 
