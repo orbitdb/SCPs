@@ -126,7 +126,7 @@ entry version 3 size: 175B
 size difference: 820B
 ```
 
-The most effective change made is that the `identity` field in version 2 has been replaced with `auth` in the example above, which becomes the CID reference of the identity, the real number of saved bytes in logs using version 3 entries will depend on the number of unique writers.
+The most effective change made is that the `identity` field in version 2 has been replaced with `auth`, which is a CID reference to the identity. The real number of saved bytes in logs using version 3 entries will depend on the number of unique writers.
 
 ```
 orbit-db identity block size: 538B
@@ -139,7 +139,7 @@ The goal of this proposal is to simplify log entries to only include the minimum
 
 This proposal does this by:
  - simplifying and removing specific entry fields
- - fields using a more space-efficient base encoding
+ - using a more space-efficient base encoding for signatures
 
 As many of the changes suggested are breaking, it may be best to introduce them with the release of OrbitDB version 1 if this proposal is accepted.
 
