@@ -111,7 +111,7 @@ What's changed?
 
 - `next`: This field has been removed. Its array values from version 2 have been moved into the `refs` array.
 
-- `refs`: This field's value is now the set union of the values of version 2 `next` and `refs` fields. This fields array is sorted alphabetically to promote determinism.
+- `refs`: This field's value is now an array including the values of the `next` and `refs` fields from entry version 2 in that order.
 
 ### Byte Comparison
 
