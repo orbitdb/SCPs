@@ -17,7 +17,7 @@ MUST pertain to several different categories:
 1. SCPs MUST have a header made up of the format SCP-{PR}: followed by the title of the SCP. 
    eg: **SCP-002: SCP Proposal**. [See TEMPLATE.md](../TEMPLATE.md)
 
-### Concensus
+### Consensus
 
 The decision by consensus MUST be evaluated according to vote in the response given to the PRs.
 
