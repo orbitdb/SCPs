@@ -19,7 +19,7 @@ Category: Security
 **Discussions-to:** Link to related issue
 
 ```
-Discussions-to: https://github.com/ZorrillosDev/WEISP/issues
+Discussions-to: https://github.com/orbitdb/SCPs/issues
 ```
 
 **Description:** Description is one full (short) sentence
