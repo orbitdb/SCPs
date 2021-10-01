@@ -3,7 +3,7 @@
 ###### Authors:
  - [@tabcat](https://github.com/tabcat)
  - [@haadcode](https://github.com/haadcode)
- 
+
 ###### Contents:
  - [Background](#background)
  - [Motivation](#motivation)
