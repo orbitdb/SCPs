@@ -42,17 +42,17 @@ Let's start by taking a look at the structure of an entry in version 2, the vers
 {
   hash: null
   v: 2,
-  id: String,
+  id: string,
   clock: {
-    time: Number,
-    id: <identity.publicKey>
+    time: number,
+    id: identity.publicKey
   },
-  key: <identity.publicKey>,
-  identity: <identity.toJSON()>,
-  sig: String,
-  payload: <JSON>,
-  next: [<CID>],
-  refs: [<CID>]
+  key: identity.publicKey,
+  identity: identity.toJSON(),
+  sig: string,
+  payload: any,
+  next: CID[],
+  refs: CID[]
 }
 ```
 This is a rough breakdown of what entry version 2 looks like read from [ipld](https://docs.ipld.io).
@@ -84,12 +84,12 @@ What's changed?
 ```
 {
   v: 3,
-  tag: String,
-  clock: Number,
-  auth: <CID>,
-  sig: String,
-  payload: <JSON>,
-  refs: [<CID>]
+  tag: string,
+  clock: number,
+  auth: CID,
+  sig: string,
+  payload: any,
+  refs: CID[]
 }
 ```
 
