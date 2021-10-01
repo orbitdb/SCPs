@@ -84,7 +84,7 @@ What's changed?
 ```
 {
   v: 3,
-  log: String,
+  tag: String,
   clock: Number,
   auth: <CID>,
   sig: String,
@@ -97,7 +97,7 @@ What's changed?
 
 - `v`: This field, which states the version, has been incremented to 3.
 
-- `log`: This field replaces/renames `id` from version 2 to be more descriptive of its purpose.
+- `tag`: This field replaces/renames `id` from version 2 to be more descriptive of its purpose.
 
 - `clock`: This field becomes the value of `clock.time` from version 2 which is a number representing a logical timestamp.
 
@@ -118,7 +118,7 @@ What's changed?
 Let's look at how the changes affected the byte size.
 
 The numbers below show the ipld block size of an orbitdb ipfs-log entry encoded using [dag-cbor](https://github.com/ipld/js-ipld-dag-cbor).
-The user space fields `payload` and `id`/`log` have been removed from both entries' blocks.
+The user space fields `payload` and `id`/`tag` have been removed from both entries' blocks.
 
 ```
 entry version 2 size: 995B
