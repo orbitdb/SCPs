@@ -87,7 +87,7 @@ What's changed?
   tag: string,
   clock: number,
   auth: CID,
-  sig: string,
+  sig: Uint8Array,
   payload: any,
   refs: CID[]
 }
@@ -105,7 +105,7 @@ What's changed?
 
 - `auth` This field replaces `identity` from version 2. It is a content-address for the identity used to authenticate the entry. In entry version 2 the `identity` field is relatively large and includes `identity.id` which is used for conflict-resolution/ordering. In entry version 3, since `identity` has been replaced with a reference to what was `identity`, the reference could take `identity.id`'s job of conflict-resolution if need be.
 
-- `sig`: This field is now encoded into base-64 instead of hex to reduce entry size.
+- `sig`: This field is now a Uint8Array and encoded by cbor as a byte string. This saves space and allows us to pass the signature directly to and from the cryptographic functions.
 
 - `payload`: This field does not change.
 
