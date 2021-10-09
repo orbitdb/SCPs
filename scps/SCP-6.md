@@ -42,7 +42,7 @@ Let's start by taking a look at the structure of an entry in version 2, the vers
 {
   hash: null
   v: 2,
-  id: string,
+  id: any,
   clock: {
     time: number,
     id: identity.publicKey
@@ -61,7 +61,7 @@ This is a rough breakdown of what entry version 2 looks like read from [ipld](ht
 
 - `v`: This field states the entry's version for anyone reading. As this is a very simple field there is not anything to change here.
 
-- `id`: This field is a string and states what log the entry belongs to. It helps to prevent mixing up entries into the wrong log and replay attacks. There is not much to change here as it's just a string set by the user in userland (like in OrbitDB). However in entry version 3 `id` is renamed to `log` because 'id' is used in a couple different places and 'log' seems much better at describing the property.
+- `id`: This field can be any type but should be easy to pattern match, OrbitDB sets it to a string. It states what log the entry belongs to and prevents mixing up entries into the wrong log and replay attacks. There is not much to change here as it's just a value set by the user in userland (like in OrbitDB). However in entry version 3 `id` is renamed to `tag` because 'id' is used in a couple different places and 'tag' seems much better at describing the property.
 
 - `clock`: This field's value is an object with two properties, `time` and `id`. It is a Lamport clock logical timestamp and is the heaviest ordering metric of entries by default. The `clock.time` field, like `v`, is simply a positive integer, however `clock.id` by default is set to identity.publicKey which already exists in other places in the entry. This is a good chunk of bytes that can be excluded, either by lazily adding `clock.id` when explicitly set by the user or removing it completely (changing `clock` to what `clock.time` is now).
 
@@ -84,7 +84,7 @@ What's changed?
 ```
 {
   v: 3,
-  tag: string,
+  tag: any,
   clock: number,
   auth: CID,
   sig: Uint8Array,
