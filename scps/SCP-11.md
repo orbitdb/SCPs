@@ -34,6 +34,7 @@ We redifine the string format:
 `/orbitdb/<root>/<path>` &rarr; `/orbitdb/<cid>`
 
 The `path` has been removed, this part should match the database name found in the manifest. We change how the stringified hash of the manifest is refered to from `root` to `cid`.
+
 This format fixes some issues which are mainly related with the `path` not able to be verified as matching the database name until the manifest is fetched.
 
 ### Binary Format
