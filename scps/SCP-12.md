@@ -14,7 +14,7 @@
 
 ### Motivation
 
-The manifest is a core part of OrbitDB. It's used as a shared setup for  databases, and its content address is used as a unique key to represent them.
+The [manifest](https://github.com/orbitdb/orbit-db/blob/main/GUIDE.md#manifest) is a core part of [OrbitDB](https://github.com/orbitdb/orbit-db/). It's used as a shared setup for  databases, and its content address is used as a unique key to represent them.
 
 Creating a class for the manifest and adjusting OrbitDB's API to use them will improve developer experience by more closely representing what is happening.
 
@@ -32,9 +32,9 @@ class Manifest {
 
   constructor({ version, name, type, acl, meta })
 
-  static create(IPFS, options): Manifest
+  static async create(IPFS, options): Manifest
 
-  static open(IPFS, Address): Manifest
+  static async open(IPFS, Address): Manifest
 
   toBytes(): Uint8Array
 
@@ -44,9 +44,9 @@ class Manifest {
 
 This class will allow for easy creation and interaction with database manifests.
 
-The `create` static method takes an instance of IPFS and options, to create a database manifest. It's similar to a combination of the [createDBManifest](https://github.com/orbitdb/orbit-db/blob/5df477ea27f23ad143cae80860767271618ca365/src/db-manifest.js#L5) function; and an OrbitDB instance's [create](https://github.com/orbitdb/orbit-db/blob/5df477ea27f23ad143cae80860767271618ca365/src/OrbitDB.js#L353) method except that it returns a manifest instance.
+The `create` static method takes an instance of [IPFS](https://github.com/ipfs/js-ipfs) and options, to create a database manifest. It's similar to a combination of the [createDBManifest](https://github.com/orbitdb/orbit-db/blob/5df477ea27f23ad143cae80860767271618ca365/src/db-manifest.js#L5) function; and an OrbitDB instance's [create](https://github.com/orbitdb/orbit-db/blob/5df477ea27f23ad143cae80860767271618ca365/src/OrbitDB.js#L353) method except that it returns a manifest instance.
 
-The `open` static method gets the manifest from IPFS by looking up the CID in the Address.
+The `open` static method gets the manifest from IPFS by looking up the CID in the Address; this is currently done [inside OrbitDB's open method](https://github.com/orbitdb/orbit-db/blob/5df477ea27f23ad143cae80860767271618ca365/src/OrbitDB.js#L447). If the manifest can be resolved, it can be read and used to open an OrbitDB Store instance immediately.
 
 ### Binary Format
 
