@@ -89,6 +89,7 @@ What's changed?
   auth: CID,
   sig: Uint8Array,
   payload: any,
+  next: CID[]
   refs: CID[]
 }
 ```
@@ -107,11 +108,11 @@ What's changed?
 
 - `sig`: This field is now a Uint8Array and encoded by cbor as a byte string. This saves space and allows us to pass the signature directly to and from the cryptographic functions.
 
-- `payload`: This field does not change.
+- `payload`: does not change
 
-- `next`: This field has been removed. Its array values from version 2 have been moved into the `refs` array.
+- `next`: does not change
 
-- `refs`: This field's value is now an array including the values of the `next` and `refs` fields from entry version 2 in that order.
+- `refs`: does not change
 
 ### Byte Comparison
 
