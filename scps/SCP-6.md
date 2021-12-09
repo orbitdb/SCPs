@@ -114,6 +114,12 @@ What's changed?
 
 - `refs`: does not change
 
+### Signature Creation
+
+The `sig` field contains the signature of the writer signing the rest of the entry data. Currently the entry data is stringified to JSON as a way to serialize it to be signed. This can result in a mismatch with how the CBOR encoded entry data since it supports more data types than JSON, like byte arrays.
+
+Starting from this new entry the sig field should be signing CBOR encoded data. Undecided whether the entry data or its CID should be signed.
+
 ### Byte Comparison
 
 Let's look at how the changes affected the byte size.
